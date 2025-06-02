@@ -34,12 +34,12 @@ SOFTWARE.
 
 ---
 
-# License Summary for **Temperature-Converter-Console-App**
+# License Summary for **Facebook Developer Scraper**
 
 <div align="center">
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge&logo=opensourceinitiative)  
-![GitHub repo](https://img.shields.io/badge/Repo-Temperature--Converter--Console--App-blue?style=for-the-badge&logo=github&logoColor=white)
+![GitHub repo](https://img.shields.io/badge/Repo-Facebook--Developer--Scraper-blue?style=for-the-badge&logo=github&logoColor=white)
 
 </div>
 
@@ -79,9 +79,10 @@ SOFTWARE.
 
 This project may include external libraries subject to their own licenses. Please check these carefully:
 
-- **.NET Core** – MIT License  
-- **System Libraries** – Microsoft licenses  
-- **NuGet Packages** – Individual licenses apply
+- **Selenium** – Apache License 2.0  
+- **openpyxl** – MIT License  
+- **Tkinter** – Python License  
+- **Chromedriver** – BSD License  
 
 ---
 
@@ -99,11 +100,11 @@ If you have questions or require permissions beyond this license:
 <div align="center">
 
 [![GitHub](https://img.shields.io/badge/GitHub-@Mostafa--SAID7-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Mostafa-SAID7)  
-[![Repo](https://img.shields.io/badge/Repo-Temperature--Converter--Console--App-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Mostafa-SAID7/Temperature-Converter-Console-App)
+[![Email](https://img.shields.io/badge/Email-m.ssaid356@gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:m.ssaid356@gmail.com)
 
 </div>
 
 ---
 
-*License last updated: **May 2025***  
-*Always refer to the [official repository](https://github.com/Mostafa-SAID7/Temperature-Converter-Console-App) for the most current version.*
+*License last updated: **June 2025***  
+*Always refer to the [official repository](https://github.com/Mostafa-SAID7/facebook-developer-scraper) for the most current version.*
