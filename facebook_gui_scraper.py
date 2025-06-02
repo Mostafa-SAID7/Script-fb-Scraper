@@ -2,48 +2,37 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 from openpyxl import Workbook
+import os
+import pickle
 import time
 import threading
 
-# === GUI Setup ===
+# === Setup ===
 window = tk.Tk()
 window.title("📘 Facebook Developer Scraper")
 window.geometry("700x600")
 window.resizable(False, False)
 
-# === Dark Mode Colors ===
+# === Dark Theme ===
 DARK_BG = "#1e1e1e"
 DARK_FG = "#f5f5f5"
 ENTRY_BG = "#2b2b2b"
-
 window.configure(bg=DARK_BG)
 
 style = ttk.Style()
 style.theme_use('clam')
+style.configure("TButton", font=("Segoe UI", 10, "bold"), padding=6, background="#3c3f41", foreground=DARK_FG)
+style.configure("TLabel", font=("Segoe UI", 10), background=DARK_BG, foreground=DARK_FG)
+style.configure("TProgressbar", background="#5c9ded")
 
-style.configure("TButton",
-                font=("Segoe UI", 10, "bold"),
-                padding=6,
-                background="#3c3f41",
-                foreground=DARK_FG)
-
-style.configure("TLabel",
-                font=("Segoe UI", 10),
-                background=DARK_BG,
-                foreground=DARK_FG)
-
-style.configure("TProgressbar",
-                background="#5c9ded")
-
-# Helper function to create section headers
 def make_section(label_text):
     ttk.Label(window, text=label_text).pack(anchor='w', padx=10)
 
-# === UI Elements ===
+# === Input Fields ===
 make_section("📎 Facebook Group URLs (one per line):")
-entry_urls = tk.Text(window, height=6, width=85, font=("Consolas", 10),
-                     bg=ENTRY_BG, fg=DARK_FG, insertbackground=DARK_FG)
+entry_urls = tk.Text(window, height=6, width=85, font=("Consolas", 10), bg=ENTRY_BG, fg=DARK_FG, insertbackground=DARK_FG)
 entry_urls.pack(padx=10)
 
 make_section("🔑 Keywords (comma-separated):")
@@ -61,22 +50,21 @@ entry_min_likes = tk.Entry(window, bg=ENTRY_BG, fg=DARK_FG, insertbackground=DAR
 entry_min_likes.insert(0, "5")
 entry_min_likes.pack(padx=10, fill='x')
 
-# === Progress and Logs ===
+# === Progress ===
 progress_label = ttk.Label(window, text="Collected 0 profiles", foreground="lightgreen")
 progress_label.pack(pady=5)
 
 progress_bar = ttk.Progressbar(window, length=400, mode='indeterminate')
 progress_bar.pack(pady=5)
 
-log_box = tk.Text(window, height=10, width=85, font=("Consolas", 9),
-                  bg=ENTRY_BG, fg=DARK_FG, insertbackground=DARK_FG)
+log_box = tk.Text(window, height=10, width=85, font=("Consolas", 9), bg=ENTRY_BG, fg=DARK_FG, insertbackground=DARK_FG)
 log_box.pack(padx=10, pady=5)
 
 def log(msg):
     log_box.insert(tk.END, f"{msg}\n")
     log_box.see(tk.END)
 
-# === Scraper Logic ===
+# === Scraper ===
 def run_scraper():
     try:
         keywords = [k.strip() for k in entry_keywords.get().split(",") if k.strip()]
@@ -87,22 +75,40 @@ def run_scraper():
         messagebox.showerror("Input Error", "Please enter valid numbers.")
         return
 
-    messagebox.showinfo("Login Required", "A Chrome window will open. Please log in to Facebook manually.")
     log("🚀 Starting the scraper...")
 
-    start_time = time.time()
     collected = set()
     total_count = 0
+    start_time = time.time()
 
-    driver = webdriver.Chrome()
+    chromedriver_path = os.path.join(os.getcwd(), "chromedriver.exe")
+    driver = webdriver.Chrome(service=Service(chromedriver_path))
     driver.get("https://www.facebook.com/")
     time.sleep(3)
-    input("📌 After logging in, return here and press Enter...")
+
+    cookie_file = "facebook_cookies.pkl"
+
+    if os.path.exists(cookie_file):
+        log("🔐 Loading saved session cookies...")
+        with open(cookie_file, "rb") as f:
+            cookies = pickle.load(f)
+            for cookie in cookies:
+                try:
+                    driver.add_cookie(cookie)
+                except:
+                    continue
+        driver.get("https://www.facebook.com/")
+        time.sleep(3)
+    else:
+        messagebox.showinfo("Login Required", "Please log in to Facebook manually in the opened browser.")
+        input("📌 After logging in, return here and press Enter...")
+        with open(cookie_file, "wb") as f:
+            pickle.dump(driver.get_cookies(), f)
+        log("✅ Cookies saved for future sessions.")
 
     wb = Workbook()
     ws = wb.active
     ws.append(["Profile Link", "Keyword", "Group URL", "Type"])
-
     progress_bar.start()
 
     for group_url in urls:
@@ -121,8 +127,7 @@ def run_scraper():
                     text = post.text
                     try:
                         likes_el = post.find_element(By.XPATH, './/span[contains(text(), "Like") or contains(text(), "likes")]')
-                        likes_text = likes_el.text
-                        likes = int(''.join(filter(str.isdigit, likes_text)))
+                        likes = int(''.join(filter(str.isdigit, likes_el.text)))
                     except:
                         likes = 0
 
@@ -161,7 +166,7 @@ def run_scraper():
     if filename:
         wb.save(filename)
         messagebox.showinfo("Saved", f"{total_count} profiles saved to:\n{filename}")
-        log(f"💾 Data saved to: {filename}")
+        log(f"💾 Saved to: {filename}")
 
     driver.quit()
     progress_bar.stop()
@@ -169,7 +174,7 @@ def run_scraper():
     log(f"🎉 Scraping completed in {elapsed} seconds.")
     progress_label.config(text="✅ Scraping Complete!")
 
-# === Thread Launcher ===
+# === Run in Thread ===
 def start_thread():
     threading.Thread(target=run_scraper).start()
 
