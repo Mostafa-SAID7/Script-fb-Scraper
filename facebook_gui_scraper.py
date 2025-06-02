@@ -6,116 +6,172 @@ from openpyxl import Workbook
 import time
 import threading
 
-# ==== إعداد الواجهة ====
+# === GUI Setup ===
 window = tk.Tk()
 window.title("📘 Facebook Developer Scraper")
+window.geometry("700x600")
+window.resizable(False, False)
 
-tk.Label(window, text="📎 روابط مجموعات فيسبوك (كل سطر = مجموعة):").pack()
-entry_urls = tk.Text(window, height=6, width=80)
-entry_urls.pack()
+# === Dark Mode Colors ===
+DARK_BG = "#1e1e1e"
+DARK_FG = "#f5f5f5"
+ENTRY_BG = "#2b2b2b"
 
-tk.Label(window, text="🔁 عدد مرات التمرير للأسفل (كلما زاد زادت النتائج):").pack()
-entry_scrolls = tk.Entry(window)
+window.configure(bg=DARK_BG)
+
+style = ttk.Style()
+style.theme_use('clam')
+
+style.configure("TButton",
+                font=("Segoe UI", 10, "bold"),
+                padding=6,
+                background="#3c3f41",
+                foreground=DARK_FG)
+
+style.configure("TLabel",
+                font=("Segoe UI", 10),
+                background=DARK_BG,
+                foreground=DARK_FG)
+
+style.configure("TProgressbar",
+                background="#5c9ded")
+
+# Helper function to create section headers
+def make_section(label_text):
+    ttk.Label(window, text=label_text).pack(anchor='w', padx=10)
+
+# === UI Elements ===
+make_section("📎 Facebook Group URLs (one per line):")
+entry_urls = tk.Text(window, height=6, width=85, font=("Consolas", 10),
+                     bg=ENTRY_BG, fg=DARK_FG, insertbackground=DARK_FG)
+entry_urls.pack(padx=10)
+
+make_section("🔑 Keywords (comma-separated):")
+entry_keywords = tk.Entry(window, bg=ENTRY_BG, fg=DARK_FG, insertbackground=DARK_FG)
+entry_keywords.insert(0, "C#, Angular, ASP.NET")
+entry_keywords.pack(padx=10, fill='x')
+
+make_section("🔁 Scroll count (for loading posts):")
+entry_scrolls = tk.Entry(window, bg=ENTRY_BG, fg=DARK_FG, insertbackground=DARK_FG)
 entry_scrolls.insert(0, "5")
-entry_scrolls.pack()
+entry_scrolls.pack(padx=10, fill='x')
 
-tk.Label(window, text="📊 عدد الإعجابات الأدنى لقبول المنشور:").pack()
-entry_min_likes = tk.Entry(window)
+make_section("📊 Minimum number of likes per post:")
+entry_min_likes = tk.Entry(window, bg=ENTRY_BG, fg=DARK_FG, insertbackground=DARK_FG)
 entry_min_likes.insert(0, "5")
-entry_min_likes.pack()
+entry_min_likes.pack(padx=10, fill='x')
 
-progress_label = tk.Label(window, text="تم جمع 0 حساب")
-progress_label.pack()
+# === Progress and Logs ===
+progress_label = ttk.Label(window, text="Collected 0 profiles", foreground="lightgreen")
+progress_label.pack(pady=5)
+
 progress_bar = ttk.Progressbar(window, length=400, mode='indeterminate')
 progress_bar.pack(pady=5)
 
-# ==== الوظيفة الأساسية ====
-def run_scraper():
-    keywords = ["C#", "Angular", "ASP.NET"]
-    urls = entry_urls.get("1.0", tk.END).strip().splitlines()
-    scroll_count = int(entry_scrolls.get())
-    min_likes = int(entry_min_likes.get())
+log_box = tk.Text(window, height=10, width=85, font=("Consolas", 9),
+                  bg=ENTRY_BG, fg=DARK_FG, insertbackground=DARK_FG)
+log_box.pack(padx=10, pady=5)
 
-    messagebox.showinfo("تنبيه", "سيفتح Chrome لتسجيل الدخول. يرجى تسجيل الدخول يدويًا أولاً.")
+def log(msg):
+    log_box.insert(tk.END, f"{msg}\n")
+    log_box.see(tk.END)
+
+# === Scraper Logic ===
+def run_scraper():
+    try:
+        keywords = [k.strip() for k in entry_keywords.get().split(",") if k.strip()]
+        urls = entry_urls.get("1.0", tk.END).strip().splitlines()
+        scroll_count = int(entry_scrolls.get())
+        min_likes = int(entry_min_likes.get())
+    except ValueError:
+        messagebox.showerror("Input Error", "Please enter valid numbers.")
+        return
+
+    messagebox.showinfo("Login Required", "A Chrome window will open. Please log in to Facebook manually.")
+    log("🚀 Starting the scraper...")
+
+    start_time = time.time()
+    collected = set()
+    total_count = 0
 
     driver = webdriver.Chrome()
     driver.get("https://www.facebook.com/")
     time.sleep(3)
-    input("📌 بعد تسجيل الدخول، ارجع لهذه النافذة واضغط Enter في الكونسول...")
+    input("📌 After logging in, return here and press Enter...")
 
     wb = Workbook()
     ws = wb.active
     ws.append(["Profile Link", "Keyword", "Group URL", "Type"])
-    collected = set()
-    total_count = 0
 
     progress_bar.start()
 
     for group_url in urls:
-        driver.get(group_url)
-        time.sleep(5)
-        for _ in range(scroll_count):
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(3)
+        log(f"🔍 Processing group: {group_url}")
+        try:
+            driver.get(group_url)
+            time.sleep(5)
 
-        posts = driver.find_elements(By.XPATH, '//div[contains(@data-ad-preview, "message")]')
+            for _ in range(scroll_count):
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(3)
 
-        for post in posts:
-            try:
-                text = post.text
-                # فلترة بالإعجابات
+            posts = driver.find_elements(By.XPATH, '//div[contains(@data-ad-preview, "message")]')
+            for post in posts:
                 try:
-                    likes_el = post.find_element(By.XPATH, './/span[contains(text(), "أعجب") or contains(text(), "Like")]')
-                    likes_text = likes_el.text
-                    likes = int(''.join(filter(str.isdigit, likes_text)))
-                except:
-                    likes = 0
+                    text = post.text
+                    try:
+                        likes_el = post.find_element(By.XPATH, './/span[contains(text(), "Like") or contains(text(), "likes")]')
+                        likes_text = likes_el.text
+                        likes = int(''.join(filter(str.isdigit, likes_text)))
+                    except:
+                        likes = 0
 
-                if likes < min_likes:
+                    if likes < min_likes:
+                        continue
+
+                    for keyword in keywords:
+                        if keyword.lower() in text.lower():
+                            try:
+                                profile_link = post.find_element(By.XPATH, './/a[contains(@href, "facebook.com")]').get_attribute("href").split("?")[0]
+                                if profile_link not in collected:
+                                    collected.add(profile_link)
+                                    ws.append([profile_link, keyword, group_url, "Post"])
+                                    total_count += 1
+                                    progress_label.config(text=f"Collected: {total_count} profiles")
+                            except:
+                                continue
+                except:
                     continue
 
-                for keyword in keywords:
-                    if keyword.lower() in text.lower():
-                        try:
-                            profile_link = post.find_element(By.XPATH, './/a[contains(@href, "facebook.com")]').get_attribute("href")
-                            profile_link = profile_link.split("?")[0]
-                            if profile_link not in collected:
-                                collected.add(profile_link)
-                                ws.append([profile_link, keyword, group_url, "Post"])
-                                total_count += 1
-                                progress_label.config(text=f"✅ تم جمع: {total_count} حساب")
-                        except:
-                            continue
-            except:
-                continue
-
-        # التعليقات
-        comments = driver.find_elements(By.XPATH, '//ul//a[contains(@href, "facebook.com") and not(contains(@href, "groups"))]')
-        for comment in comments:
-            try:
-                href = comment.get_attribute("href")
-                if href and ("facebook.com/profile.php" in href or "/people/" in href):
-                    href = href.split("?")[0]
-                    if href not in collected:
+            comments = driver.find_elements(By.XPATH, '//ul//a[contains(@href, "facebook.com") and not(contains(@href, "groups"))]')
+            for comment in comments:
+                try:
+                    href = comment.get_attribute("href").split("?")[0]
+                    if ("facebook.com/profile.php" in href or "/people/" in href) and href not in collected:
                         collected.add(href)
                         ws.append([href, "N/A", group_url, "Comment"])
                         total_count += 1
-                        progress_label.config(text=f"✅ تم جمع: {total_count} حساب")
-            except:
-                continue
+                        progress_label.config(text=f"Collected: {total_count} profiles")
+                except:
+                    continue
+        except Exception as e:
+            log(f"❌ Error in group {group_url}: {e}")
 
     filename = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
     if filename:
         wb.save(filename)
-        messagebox.showinfo("✅ تم", f"تم حفظ {total_count} حساب في الملف:\n{filename}")
+        messagebox.showinfo("Saved", f"{total_count} profiles saved to:\n{filename}")
+        log(f"💾 Data saved to: {filename}")
 
     driver.quit()
     progress_bar.stop()
-    progress_label.config(text="🎉 الاستخراج اكتمل!")
+    elapsed = round(time.time() - start_time, 2)
+    log(f"🎉 Scraping completed in {elapsed} seconds.")
+    progress_label.config(text="✅ Scraping Complete!")
 
-# ==== تشغيل في خيط مستقل ====
+# === Thread Launcher ===
 def start_thread():
     threading.Thread(target=run_scraper).start()
 
-tk.Button(window, text="تشغيل السكربت ✅", command=start_thread, bg="green", fg="white").pack(pady=10)
+ttk.Button(window, text="Start Scraping ✅", command=start_thread).pack(pady=10)
 window.mainloop()
