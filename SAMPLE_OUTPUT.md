@@ -1,64 +1,40 @@
+# Sample Output
 
-## Usage
+---
 
-1. Launch the application
-2. Follow the on-screen prompts to:
-   - Enter the temperature value
-   - Select the source temperature scale
-   - Select the target temperature scale
-3. View the converted result
-4. Choose to perform another conversion or exit
+This is a sample snapshot of the data exported by the **Facebook Developer Scraper** to an Excel file (`.xlsx`).
 
-### Example Usage
-```
-Welcome to Temperature Converter!
+Each row represents a unique Facebook profile found either in posts or comments, filtered by your configured keywords and minimum likes.
 
-Enter temperature value: 100
-Select source scale:
-1. Celsius
-2. Fahrenheit
-3. Kelvin
-Choice: 1
+---
 
-Select target scale:
-1. Celsius
-2. Fahrenheit
-3. Kelvin
-Choice: 2
+## Excel Columns
 
-Result: 100°C = 212°F
-```
+| Profile Link                                      | Keyword    | Group URL                            | Type    |
+| ------------------------------------------------ | ---------- | ---------------------------------- | ------- |
+| https://www.facebook.com/john.doe                 | C#         | https://www.facebook.com/groups/123 | Post    |
+| https://www.facebook.com/jane.smith               | Angular    | https://www.facebook.com/groups/123 | Post    |
+| https://www.facebook.com/profile.php?id=10001122  | N/A        | https://www.facebook.com/groups/123 | Comment |
+| https://www.facebook.com/dev.user                  | ASP.NET    | https://www.facebook.com/groups/456 | Post    |
 
-## Temperature Conversion Formulas
+---
 
-The application uses the following standard conversion formulas:
+## Explanation of Columns
 
-**Celsius to Fahrenheit:**
-```
-°F = (°C × 9/5) + 32
-```
+- **Profile Link**: The direct URL to the Facebook user profile scraped from posts or comments.  
+- **Keyword**: The keyword from your list (e.g., C#, Angular) matched in the post content. Comments have "N/A" since no keyword filtering applies.  
+- **Group URL**: The Facebook group URL where the post or comment was found.  
+- **Type**: Indicates if the profile was found in a "Post" or a "Comment".
 
-**Celsius to Kelvin:**
-```
-K = °C + 273.15
-```
+---
 
-**Fahrenheit to Celsius:**
-```
-°C = (°F - 32) × 5/9
-```
+## Notes
 
-**Fahrenheit to Kelvin:**
-```
-K = (°F - 32) × 5/9 + 273.15
-```
+- Profiles are filtered to avoid duplicates.  
+- Only posts with likes greater than or equal to the configured minimum are included.  
+- The scraper requires manual Facebook login in Chrome before running.  
+- Output file format is Excel `.xlsx`.
 
-**Kelvin to Celsius:**
-```
-°C = K - 273.15
-```
+---
 
-**Kelvin to Fahrenheit:**
-```
-°F = (K - 273.15) × 9/5 + 32
-```
+*This sample data is for demonstration purposes only and does not contain real user information.*
