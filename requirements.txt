@@ -1,1 +1,3 @@
  # 📦 Dependencies
+selenium
+openpyxl
