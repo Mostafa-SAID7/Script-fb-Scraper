@@ -1,94 +1,119 @@
-# Temperature Converter Console App
+# 📘 Facebook Developer Scraper
 
-A simple and efficient console-based temperature converter application built in C# that allows users to convert temperatures between Celsius, Fahrenheit, and Kelvin.
+A powerful GUI tool for scraping Facebook group posts and comments to extract developer-related profile links based on custom keywords. Built with Python, Selenium, and Tkinter, it features:
 
-## Features
-
-- **Multiple Temperature Scales**: Convert between Celsius (°C), Fahrenheit (°F), and Kelvin (K)
-- **Interactive Console Interface**: User-friendly command-line interface
-- **Input Validation**: Robust error handling for invalid inputs
-- **Precise Calculations**: Accurate temperature conversion formulas
-- **Clean Code Structure**: Well-organized and maintainable codebase
-
-## Supported Conversions
-
-The application supports all possible conversions between:
-- Celsius to Fahrenheit
-- Celsius to Kelvin
-- Fahrenheit to Celsius
-- Fahrenheit to Kelvin
-- Kelvin to Celsius
-- Kelvin to Fahrenheit
-
-## Installation
-
-### Prerequisites
-- .NET Core 3.1 or later
-- Any C# compatible IDE (Visual Studio, Visual Studio Code, etc.)
-
-### Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Mostafa-SAID7/Temperature-Converter-Console-App.git
-   ```
-
-2. Navigate to the project directory:
-   ```bash
-   cd Temperature-Converter-Console-App
-   ```
-
-3. Build the project:
-   ```bash
-   dotnet build
-   ```
-
-4. Run the application:
-   ```bash
-   dotnet run
-   ```
-
-## Project Structure
-
-```
-Temperature-Converter-Console-App/
-├── Program.cs              # Main application entry point
-├── TemperatureConverter.cs # Core conversion logic
-├── README.md              # Project documentation
-└── Temperature-Converter-Console-App.csproj # Project file
-```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## Future Enhancements
-
-- [ ] Add support for additional temperature scales (Rankine, Réaumur)
-- [ ] Implement batch conversion from file input
-- [ ] Add GUI version using Windows Forms or WPF
-- [ ] Include unit tests for conversion accuracy
-- [ ] Add configuration file for custom settings
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## Author
-
-**Mostafa SAID**
-- GitHub: [@Mostafa-SAID7](https://github.com/Mostafa-SAID7)
-
-## Acknowledgments
-
-- Thanks to the .NET community for excellent documentation
-- Inspired by the need for a simple, reliable temperature conversion tool
+- 🌙 Dark mode interface  
+- 🔐 Auto-login via cookies  
+- 🧾 Export to Excel  
+- 🧳 Embedded ChromeDriver  
+- 🖼️ Custom icon support  
+- 📦 One-click `.exe` build  
 
 ---
 
-*For any questions or suggestions, please open an issue or contact the author directly.*
+## 🚀 Features
+
+- 🎨 Dark-themed modern GUI
+- 🔍 Keyword filtering (e.g., `C#`, `Angular`, `ASP.NET`)
+- 🔁 Adjustable scroll depth per group
+- ❤️ Filter by minimum post likes
+- 💬 Profile extraction from posts **and** comments
+- 🔐 Persistent login using Facebook cookies
+- 💾 Save results to Excel `.xlsx`
+- 🖱️ Standalone `.exe` support with app icon
+
+---
+
+## 📥 Download
+
+<a href="https://your-download-link.com/facebook_scraper_gui.exe" target="_blank">
+  <img src="https://img.shields.io/badge/Download_Executable-.EXE-green?style=for-the-badge&logo=windows&logoColor=white" alt="Download .EXE" />
+</a>
+
+> ✅ Requires Chrome browser installed
+
+---
+
+## 🧰 Requirements
+
+- Python 3.8+
+- Google Chrome
+- ChromeDriver (auto-bundled in `.exe`)
+- Facebook account
+
+---
+
+## ⚙️ Setup Guide (Python Users)
+
+### 1. Clone the Project
+
+```bash
+
+git clone https://github.com/yourusername/facebook-scraper.git
+cd facebook-scraper
+
+2. Install Dependencies
+
+pip install -r requirements.txt
+
+Or manually:
+
+pip install selenium openpyxl
+```
+3. Download & Place ChromeDriver
+
+Visit Chrome for Testing
+
+Download the version matching your Chrome
+
+Extract chromedriver.exe into the project folder
+
+## ▶️ Running the App
+```
+python facebook_scraper_gui.py
+```
+First time:
+
+Login to Facebook in the opened browser
+
+Press Enter in the terminal after logging in
+
+Your session is saved for next time (via cookies)
+
+#### 🧱 Build .EXE (Optional)
+1. Install PyInstaller
+```
+pip install pyinstaller
+
+2. Run Build Command
+
+pyinstaller --onefile --windowed --icon=icon.ico --add-data "chromedriver.exe;." facebook_scraper_gui.py
+This generates dist/facebook_scraper_gui.exe
+You can now run it like any regular Windows app.
+```
+#### 📤 Output
+The app saves an Excel .xlsx file with these columns:
+
+Profile Link	Keyword	Group URL	Type
+URL	C#	Group URL	Post
+URL	N/A	Group URL	Comment
+
+## 📁 Folder Structure
+```
+facebook_scraper/
+├── facebook_scraper_gui.py
+├── chromedriver.exe
+├── icon.ico
+├── requirements.txt
+├── README.md
+📃 License
+```
+1. This project is intended for educational and ethical use only.
+2. You must comply with Facebook's Terms of Service.
+
+## 🙌 Credits
+- UI: Tkinter
+- Automation: Selenium WebDriver
+- Excel Export: OpenPyXL
+- Icon Design: favicon.io
+- Badge: shields.io
